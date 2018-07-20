@@ -104,7 +104,7 @@ function doDisplayDialog() {
      * default: //550, 350, 1000, 800
      */
 
-    dialog   = new Window(
+    dialog = new Window(
         "dialog", LANG.LABEL_DIALOG_WINDOW, [
             dialogLeft,
             dialogTop,
@@ -172,11 +172,15 @@ function doDisplayDialog() {
         dialog.openBtn           = dialog.add('button',     [334, 360, 434, 390], LANG.BUTTON_OK, {name: 'ok'});
         dialog.saveBtn           = dialog.add('button',     [p1,  360, p1 + 120, 390], LANG.BUTTON_SAVE, {name: 'save'});
 
-        dialog.saveBtn.enabled = false;
-        dialog.openBtn.enabled = false;
-
         initPresetsList(dialog);
         initButtons();
+
+        dialog.setOutputFilename = function() {
+            dialog.filename.text = "contact-" + CONFIG.PG_WIDTH + "x" + CONFIG.COLS + "x" + CONFIG.ROWS + "@" + CONFIG.SCALE + ".ai";
+            CONFIG.OUTPUT_FILENAME = dialog.filename.text;
+        }
+
+        dialog.setOutputFilename();
 
         function updateConfig() {
 
@@ -191,6 +195,9 @@ function doDisplayDialog() {
             CONFIG.FRM_WIDTH       = CONFIG.COL_WIDTH;
             CONFIG.FRM_HEIGHT      = CONFIG.ROW_HEIGHT;
             CONFIG.OUTPUT_FILENAME = dialog.filename.text;
+        }
+        dialog.updateConfig = function() {
+            updateConfig();
         }
 
         function initButtons() {
@@ -215,16 +222,39 @@ function doDisplayDialog() {
             if (Utils.trim(dialog.srcFolder.text) == "") return;
 
             var testFolder = new Folder(dialog.srcFolder.text);
-            if (! testFolder.exists) return;
+            // if (! testFolder.exists) return;
 
             dialog.openBtn.enabled = true;
         }
+        dialog.initButtons = function() {
+            initButtons();
+        }
 
-        dialog.pageWidth.onChange  = initButtons;
+        dialog.pageWidth.onChange = function() {
+            CONFIG.PG_WIDTH = dialog.pageWidth.text;
+            initButtons();
+            dialog.setOutputFilename();
+        }
+
+        dialog.cols.onChange = function() {
+            CONFIG.COLS = dialog.cols.text;
+            initButtons();
+            dialog.setOutputFilename();
+        }
+
+        dialog.rows.onChange = function() {
+            CONFIG.ROWS = dialog.rows.text;
+            initButtons();
+            dialog.setOutputFilename();
+        }
+
+        dialog.scale.onChange = function() {
+            CONFIG.SCALE = dialog.scale.text;
+            initButtons();
+            dialog.setOutputFilename();
+        }
+
         dialog.pageHeight.onChange = initButtons;
-        dialog.cols.onChange       = initButtons;
-        dialog.rows.onChange       = initButtons;
-        dialog.scale.onChange      = initButtons;
         dialog.filename.onChange   = initButtons;
         dialog.srcFolder.onChange  = initButtons;
 
@@ -254,7 +284,10 @@ function doDisplayDialog() {
                 CONFIG.SRC_FOLDER = srcFolder;
 
                 if ( Utils.trim(dialog.filename.text) == '' ) {
-                    dialog.filename.text = srcFolder.name + '-contact-sheet.ai';
+                    // dialog.filename.text = srcFolder.name + '-contact-sheet.ai';
+
+                    setOutputFilename();
+
                     CONFIG.OUTPUT_FILENAME = dialog.filename.text;
                 }
                 initButtons();
@@ -348,7 +381,10 @@ function initSettingsForm( dialog, filepath ) {
         dialog.cols.text       = Utils.get(presets, 'COLS',      '');
         dialog.rows.text       = Utils.get(presets, 'ROWS',      '');
         dialog.scale.text      = Utils.get(presets, 'SCALE',     '');
+        dialog.updateConfig();
     }
+
+    dialog.setOutputFilename();
 }
 
 /**
