@@ -52,6 +52,6 @@ You are free to use, modify, and distribute this script as you see fit as long a
 
 Attribution:
 
-Resize Artboards by:
-Scott Lewis <scott@atomiclotus.net>
+Resize Artboards by:<br>
+Scott Lewis &lt;scott@atomiclotus.net&gt;<br>
 https://atomiclotus.net
