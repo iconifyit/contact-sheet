@@ -44,19 +44,19 @@
 
 #target Illustrator
 
-#include "../utils.jsx";
+#include "inc/utils.jsx";
 
 if (typeof(Utils) != 'object') {
     alert('Missing required class Utils (/Adobe Illustrator/presets/en_us/scripts/utils.jsx)');
 }
 
-#include "config.jsx";
+#include "inc/config.jsx";
 
 if (typeof(CONFIG) != 'object') {
     alert('Missing required class CONFIG (/Adobe Illustrator/presets/en_us/scripts/Contact Sheet/config.jsx)');
 }
 
-#include "lang.jsx";
+#include "inc/lang.jsx";
 
 if (typeof(LANG) != 'object') {
     alert('Missing required class LANG (/Adobe Illustrator/presets/en_us/scripts/Contact Sheet/lang.jsx)');
@@ -94,7 +94,6 @@ function doDisplayDialog() {
 
     if ( bounds = Utils.getScreenSize() ) {
         dialogLeft = Math.abs(Math.ceil((bounds.width/2) - (dialogWidth/2)));
-        // dialogTop  = Math.abs(Math.ceil((bounds.height) - (dialogHeight/2)));
     }
 
     response = false;
@@ -212,8 +211,8 @@ function doDisplayDialog() {
             if (Utils.trim(dialog.scale.text) == "") return;
             if (parseInt(dialog.pageWidth.text) < 10 ) return;
             if (parseInt(dialog.pageHeight.text) < 10 ) return;
-            if (parseInt(dialog.cols.text) < 10 ) return;
-            if (parseInt(dialog.rows.text) < 10 ) return;
+            if (parseInt(dialog.cols.text) < 1 ) return;
+            if (parseInt(dialog.rows.text) < 1 ) return;
             if (parseInt(dialog.scale.text) < 1 ) return;
 
             dialog.saveBtn.enabled = true;
@@ -387,13 +386,17 @@ function initSettingsForm( dialog, filepath ) {
     dialog.setOutputFilename();
 }
 
+function padNumber(theNumber, width) {
+    return ( value + 100000 ).toString().slice(-width);
+}
+
 /**
  * Main logic to create the contact sheet.
  * @return void
  */
 function doCreateContactSheet() {
 
-    var doc, srcFolder, svgFile, svgFileList, saveCompositeFile;
+    var doc, srcFolder, svgFile, srcFileList, saveCompositeFile;
 
     saveCompositeFile = false;
 
@@ -405,27 +408,37 @@ function doCreateContactSheet() {
 
     if ( srcFolder == null ) return;
 
-    if (svgFileList = Utils.getFilesInSubfolders( srcFolder )) {
+    if (srcFileList = Utils.getFilesInSubfolders( srcFolder )) {
+
+        srcFileList = Utils.sortFileList(srcFileList);
 
         if (Utils.trim(CONFIG.OUTPUT_FILENAME) == "") {
             CONFIG.OUTPUT_FILENAME = srcFolder.name.replace(" ", "-") + "-contact-sheet.ai";
         }
 
-        CONFIG.PG_COUNT = Math.ceil(svgFileList.length / (CONFIG.ROWS * CONFIG.COLS));
+        CONFIG.PG_COUNT = Math.ceil(srcFileList.length / (CONFIG.ROWS * CONFIG.COLS));
 
         app.coordinateSystem = CoordinateSystem.ARTBOARDCOORDINATESYSTEM;
 
-        doc = app.documents.add(
-            DocumentColorSpace.RGB,
-            CONFIG.PG_WIDTH,
-            CONFIG.PG_HEIGHT,
-            CONFIG.PG_COUNT,
-            DocumentArtboardLayout.GridByCol,
-            CONFIG.GUTTER,
-            Math.round(Math.sqrt(CONFIG.PG_COUNT))
-        );
+        try {
+            doc = app.documents.add(
+                DocumentColorSpace.RGB,
+                CONFIG.PG_WIDTH,
+                CONFIG.PG_HEIGHT,
+                CONFIG.PG_COUNT,
+                DocumentArtboardLayout.GridByCol,
+                10,
+                Math.round(Math.sqrt(CONFIG.PG_COUNT))
+            );
+        }
+        catch( ex ) {
+            Utils.logger(LANG.DOC_NOT_CREATED + ex);
+            return;
+        }
 
-        for (var i = 0; i < svgFileList.length; i++) {
+        Utils.showProgressBar(srcFileList.length);
+
+        for (var i = 0; i < srcFileList.length; i++) {
 
             var board;
             var bounds;
@@ -437,7 +450,7 @@ function doCreateContactSheet() {
             var myRowHeight   = CONFIG.ROW_HEIGHT + CONFIG.GUTTER;
             var myColumnWidth = CONFIG.COL_WIDTH  + CONFIG.GUTTER;
 
-            for (var pageCounter = CONFIG.PG_COUNT -1; pageCounter >= 0; pageCounter--) {
+            for (var pageCounter = 0; pageCounter < CONFIG.PG_COUNT; pageCounter++) {
 
                 doc.artboards.setActiveArtboardIndex(pageCounter);
                 board  = doc.artboards[pageCounter];
@@ -449,7 +462,7 @@ function doCreateContactSheet() {
                  * @type {number}
                  */
 
-                rowCount = Math.ceil((svgFileList.length / CONFIG.COLS));
+                rowCount = Math.ceil((srcFileList.length / CONFIG.COLS));
                 rowCount = CONFIG.ROWS > rowCount ? rowCount : CONFIG.ROWS ;
 
                 for (var rowCounter = 1 ; rowCounter <= rowCount; rowCounter++) {
@@ -466,7 +479,7 @@ function doCreateContactSheet() {
 
                     if (rowCounter > 1) {
 
-                        var remaining = Math.ceil(svgFileList.length - i);
+                        var remaining = Math.ceil(srcFileList.length - i);
                         if (remaining < colCount) {
                             colCount = remaining;
                         }
@@ -475,16 +488,17 @@ function doCreateContactSheet() {
                     for (var columnCounter = 1 ; columnCounter <= colCount; columnCounter++) {
                         try {
 
-                            var f = new File(svgFileList[i]);
+                            var f = new File(srcFileList[i]);
 
                             if (f.exists) {
 
                                 try {
+                                    var prefix = padNumber(columnCount, 3) + " - " ;
                                     if (i == 0) {
-                                        doc.layers[0].name = f.name;
+                                        doc.layers[0].name = prefix + f.name;
                                     }
                                     else {
-                                        doc.layers.add().name = f.name;
+                                        doc.layers.add().name = prefix + f.name;
                                     }
                                 }
                                 catch(ex) {
@@ -492,6 +506,8 @@ function doCreateContactSheet() {
                                 }
 
                                 svgFile = doc.groupItems.createFromFile(f);
+
+                                Utils.updateProgress("icons imported");
 
                                 var liveWidth = (CONFIG.COLS * (CONFIG.FRM_WIDTH + CONFIG.GUTTER)) - CONFIG.GUTTER;
                                 var hoff = Math.ceil((CONFIG.PG_WIDTH - liveWidth) / 2);
@@ -519,6 +535,8 @@ function doCreateContactSheet() {
                                         );
                                     }
 
+                                    redraw();
+
                                     /**
                                      * Only save the composite file if at least one
                                      * icon exists and is successfully imported.
@@ -533,7 +551,7 @@ function doCreateContactSheet() {
                                 }
                             }
                             else {
-                                Utils.logger(svgFileList[i] + LANG.DOES_NOT_EXIST);
+                                Utils.logger(srcFileList[i] + LANG.DOES_NOT_EXIST);
                             }
                         }
                         catch(ex) {
@@ -543,10 +561,15 @@ function doCreateContactSheet() {
                     }
                 }
             }
-            if (saveCompositeFile) {
-                Utils.saveFileAsAi(doc, srcFolder.path + "/" + CONFIG.OUTPUT_FILENAME, CONFIG.AIFORMAT);
-            }
         }
+
+        Utils.progressBarText("Saving contact sheet");
+
+        if (saveCompositeFile) {
+            Utils.saveFileAsAi(doc, srcFolder.path + "/" + CONFIG.OUTPUT_FILENAME, CONFIG.AIFORMAT);
+        }
+
+        Utils.hideProgressBar();
     }
 }
 
