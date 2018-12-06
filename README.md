@@ -40,7 +40,7 @@ To use this script, you will need to copy the entire <strong>Contact Sheet</stro
 
 <strong>NOTE</strong> : changing the default configuration can break the <strong>Contact Sheet</strong> utility. Proceed with caution.
 
-You can change many of the default settings such as the location of the presets and log files, Illustrator version compatibility, etc.
+You can change many of the default settings such as the location of the presets and log files, Illustrator version compatibility, etc., by editing the `config.js` file in the download.
 
 ## Disclaimer of Liability
 
