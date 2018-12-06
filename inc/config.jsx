@@ -129,7 +129,7 @@ var CONFIG = {
      * Starting folder for folder selector dialog
      */
 
-    START_FOLDER: "~/github/iconify",
+    START_FOLDER: Folder.myDocuments,
 
     /**
      * The contact sheet file name
@@ -163,19 +163,19 @@ var CONFIG = {
     /**
      * Presets folder path
      */
-    PRESETS_FOLDER: '~/ai-contact-sheet/presets',
+    PRESETS_FOLDER: Folder.myDocuments + '/ai-contact-sheet/presets',
 
     /**
      * Log folder path
      */
 
-    LOG_FOLDER: '~/ai-contact-sheet/logs/',
+    LOG_FOLDER: Folder.myDocuments + '/ai-contact-sheet/logs/',
 
     /**
      * Log file location
      */
 
-    LOG_FILE_PATH: '~/ai-contact-sheet/logs/' + Utils.doDateFormat(new Date()) + '-log.txt',
+    LOG_FILE_PATH: Folder.myDocuments + '/ai-contact-sheet/logs/' + Utils.doDateFormat(new Date()) + '-log.txt',
 
     /**
      * Default path separator
