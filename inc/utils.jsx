@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017 Scott Lewis
+ * Copyright (c) 2020 Atomic Lotus, LLC
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,12 @@
  *
  */
 
+/**
+ * @author  Scott Lewis <scott@atomiclotus.net>
+ * @url     https://atomiclotus.net
+ * @date    2020-01-05
+ */
+
 var Utils = {};
 
 /**
@@ -37,9 +43,9 @@ Utils.progress = {};
  * @param _default
  * @returns {*}
  */
-Utils.get = function( subject, key, _default ) {
+Utils.get = function(subject, key, _default) {
     var value = _default;
-    if (typeof(subject[key]) != 'undefined') {
+    if (typeof subject[key] !== 'undefined') {
         value = subject[key];
     }
     return value;
@@ -53,7 +59,7 @@ Utils.get = function( subject, key, _default ) {
 Utils.getScreenSize = function() {
 
     try {
-        if (view = app.activeDocument.views[0] ) {
+        if (view = app.activeDocument.views[0]) {
             var zoom = view.zoom;
             view.zoom = 1;
             var screenSize = {
@@ -79,7 +85,7 @@ Utils.getScreenSize = function() {
  * @param {int}      aiformat   The Adobe Illustrator format (version)
  * @return void
  */
-Utils.saveFileAsAi = function( doc, path, aiformat ) {
+Utils.saveFileAsAi = function(doc, path, aiformat) {
     if (app.documents.length > 0) {
         var theDoc  = new File(path);
         var options = new IllustratorSaveOptions();
@@ -107,7 +113,7 @@ Utils.trim = function(str) {
 Utils.logger = function(txt) {
 
     if (CONFIG.LOGGING == 0) return;
-    Utils.folder( CONFIG.LOG_FOLDER );
+    Utils.folder(CONFIG.LOG_FOLDER);
     Utils.write_file(CONFIG.LOG_FILE_PATH, "[" + new Date().toUTCString() + "] " + txt);
 };
 
@@ -118,12 +124,12 @@ Utils.logger = function(txt) {
  * @param {bool}    replace     Replace the file
  * @return void
  */
-Utils.write_file = function( path, txt, replace ) {
+Utils.write_file = function(path, txt, replace) {
     try {
-        var file = new File( path );
+        var file = new File(path);
         if (replace && file.exists) {
             file.remove();
-            file = new File( path );
+            file = new File(path);
         }
         file.open("e", "TEXT", "????");
         file.seek(0,2);
@@ -148,12 +154,12 @@ Utils.write_file = function( path, txt, replace ) {
  * @param {bool}    replace     Replace the file
  * @return void
  */
-Utils.write_and_call = function( path, txt, callback ) {
+Utils.write_and_call = function(path, txt, callback) {
     try {
-        var file = new File( path );
+        var file = new File(path);
         if (file.exists) {
             file.remove();
-            file = new File( path );
+            file = new File(path);
         }
         file.open("e", "TEXT", "????");
         file.seek(0,2);
@@ -177,7 +183,7 @@ Utils.write_and_call = function( path, txt, callback ) {
  * @param json
  * @param replace
  */
-Utils.write_json_file = function( path, json, replace ) {
+Utils.write_json_file = function(path, json, replace) {
     try {
         Utils.write_file(path, Utils.objectToString(json), replace);
     }
@@ -191,7 +197,7 @@ Utils.write_json_file = function( path, json, replace ) {
  * @param filepath
  * @returns {string}
  */
-Utils.read_file = function( filepath ) {
+Utils.read_file = function(filepath) {
 
     var content = "";
 
@@ -206,7 +212,7 @@ Utils.read_file = function( filepath ) {
                         LANG.CHOOSE_FILE,
                         txt_filter,
                         false
-                    );
+                   );
                 }
             }
         }
@@ -239,9 +245,9 @@ Utils.read_file = function( filepath ) {
 Utils.read_json_file = function(filepath) {
     var contents, result;
     try {
-        if ( contents = Utils.read_file( filepath ) ) {
-            result = eval("(" + contents + ")" );
-            if ( typeof(result) != 'object') {
+        if (contents = Utils.read_file(filepath)) {
+            result = eval("(" + contents + ")");
+            if (typeof result !== 'object') {
                 result = null;
             }
         }
@@ -257,7 +263,7 @@ Utils.read_json_file = function(filepath) {
  * @param filepath
  * @param mustconfirm
  */
-Utils.deleteFile = function( filepath, mustconfirm ) {
+Utils.deleteFile = function(filepath, mustconfirm) {
     try {
         if (mustconfirm && ! confirm(LANG.CONFIRM_DELETE_PRESET)) {
             return;
@@ -272,8 +278,8 @@ Utils.deleteFile = function( filepath, mustconfirm ) {
 /**
  * Initialize a folder.
  */
-Utils.folder = function( path ) {
-    var theFolder = new Folder( path );
+Utils.folder = function(path) {
+    var theFolder = new Folder(path);
     if (! theFolder.exists) {
         theFolder.create();
     }
@@ -321,11 +327,11 @@ Utils.sortFileList = function(theList) {
  * @param srcFolder
  * @returns {Array}
  */
-Utils.getFilesInSubfolders = function( srcFolder ) {
+Utils.getFilesInSubfolders = function(srcFolder) {
 
     var allFiles, theFolders, svgFileList;
 
-    if ( ! srcFolder instanceof Folder) return;
+    if (! srcFolder instanceof Folder) return;
 
     allFiles    = srcFolder.getFiles();
     theFolders  = [];
@@ -385,7 +391,7 @@ Utils.objectToString = function(obj) {
             value = '[' + value.join(',') + ']';
         }
         else if (typeof(value) == 'object') {
-            value = objectToString(value);
+            value = Utils.objectToString(value);
         }
         items.push('"' + key + '": "' + value + '"');
     }
@@ -399,11 +405,11 @@ Utils.objectToString = function(obj) {
 Utils.alignToNearestPixel = function(sel) {
 
     try {
-        if (typeof sel != "object") {
+        if (typeof sel !== "object") {
             Utils.logger(LANG.NO_SELECTION);
         }
         else {
-            for (i = 0 ; i < sel.length; i++) {
+            for (var i = 0 ; i < sel.length; i++) {
                 sel[i].left = Math.round(sel[i].left);
                 sel[i].top = Math.round(sel[i].top);
             }
@@ -430,8 +436,8 @@ Utils.isVisibleAndUnlocked = function(item) {
  * @returns {boolean}
  */
 Utils.anyParentLocked = function(item) {
-    while ( item.parent ) {
-        if ( item.parent.locked ) {
+    while (item.parent) {
+        if (item.parent.locked) {
             return true;
         }
         item = item.parent;
@@ -445,8 +451,8 @@ Utils.anyParentLocked = function(item) {
  * @returns {boolean}
  */
 Utils.anyParentHidden = function(item) {
-    while ( item.parent ) {
-        if ( item.parent.hidden ) {
+    while (item.parent) {
+        if (item.parent.hidden) {
             return true;
         }
         item = item.parent;
@@ -462,7 +468,7 @@ Utils.anyParentHidden = function(item) {
 //TODO: Does not currently work.
 Utils.groupSelection = function(selection){
     if (selection.length > 0) {
-        for (i = 0; i < selection.length; i++) {
+        for (var i = 0; i < selection.length; i++) {
             selection[i].moveToEnd(newGroup);
         }
     }
@@ -475,16 +481,16 @@ Utils.groupSelection = function(selection){
  */
 Utils.showProgressBar = function(maxvalue) {
 
-    var top, right, bottom, left;
+    var top, right, bottom, left, bounds;
 
-    if ( bounds = Utils.getScreenSize() ) {
+    if (bounds = Utils.getScreenSize()) {
         left = Math.abs(Math.ceil((bounds.width/2) - (450/2)));
         top = Math.abs(Math.ceil((bounds.height/2) - (100/2)));
     }
 
-    var progress = new Window("palette", 'Progress', [left, top, left + 450, top + 120]);
-    progress.pnl = progress.add("panel", [10, 10, 440, 100], 'Progress');
-    progress.pnl.progBar = progress.pnl.add("progressbar", [20, 45, 410, 60], 0, maxvalue);
+    var rprogress             = new Window("palette", 'Progress', [left, top, left + 450, top + 120]);
+    progress.pnl              = progress.add("panel", [10, 10, 440, 100], 'Progress');
+    progress.pnl.progBar      = progress.pnl.add("progressbar", [20, 45, 410, 60], 0, maxvalue);
     progress.pnl.progBarLabel = progress.pnl.add("statictext", [20, 20, 320, 35], "0 of " + maxvalue);
 
     progress.show();
@@ -499,6 +505,7 @@ Utils.hideProgressBar = function() {
     Utils.progress.hide();
     Utils.progress = null;
 }
+
 /**
  * Updates the progress bar.
  * @param progress
@@ -544,9 +551,9 @@ Utils.progressBarText = function(message) {
  */
 function showProgressBar(maxvalue) {
 
-    var top, right, bottom, left;
+    var top, right, bottom, left, bounds;
 
-    if ( bounds = Utils.getScreenSize() ) {
+    if (bounds = Utils.getScreenSize()) {
         left = Math.abs(Math.ceil((bounds.width/2) - (450/2)));
         top = Math.abs(Math.ceil((bounds.height/2) - (100/2)));
     }

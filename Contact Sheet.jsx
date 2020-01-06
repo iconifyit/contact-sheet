@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017 Iconfinder
+ * Copyright (c) 2020 Atomic Lotus, LLC
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,9 @@
  */
 
 /**
- * @author  Iconfinder <scott@iconfinder.com>
- * @date    2017-02-04
+ * @author  Scott Lewis <scott@atomiclotus.net>
+ * @url     https://atomiclotus.net
+ * @date    2020-01-05
  *
  *  Installation:
  *
@@ -46,24 +47,26 @@
 
 #include "inc/utils.jsx";
 
-if (typeof(Utils) != 'object') {
+var _can_run = true;
+
+if (typeof(Utils) !== 'object') {
     alert('Missing required class Utils (/Adobe Illustrator/presets/en_us/scripts/utils.jsx)');
+    _can_run = false;
 }
 
 #include "inc/config.jsx";
 
-if (typeof(CONFIG) != 'object') {
+if (typeof(CONFIG) !== 'object') {
     alert('Missing required class CONFIG (/Adobe Illustrator/presets/en_us/scripts/Contact Sheet/config.jsx)');
+    _can_run = false;
 }
 
 #include "inc/lang.jsx";
 
-if (typeof(LANG) != 'object') {
+if (typeof(LANG) !== 'object') {
     alert('Missing required class LANG (/Adobe Illustrator/presets/en_us/scripts/Contact Sheet/lang.jsx)');
+    _can_run = false;
 }
-
-var originalInteractionLevel = userInteractionLevel;
-userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
 
 /**
  * Displays the settings dialog
@@ -573,6 +576,12 @@ function doCreateContactSheet() {
     }
 }
 
-doCreateContactSheet();
+if ( _can_run ) {
 
-userInteractionLevel = originalInteractionLevel;
+    var originalInteractionLevel = userInteractionLevel;
+    userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
+
+    doCreateContactSheet();
+
+    userInteractionLevel = originalInteractionLevel;
+}
