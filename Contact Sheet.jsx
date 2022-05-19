@@ -394,6 +394,39 @@ function padNumber(theNumber, width) {
 }
 
 /**
+ * Places a text label 
+ * @param {string} text
+ * @param {string} pos - The X/Y position of the label
+ * @param {string} size - The text content of the label 
+ * @returns void 
+ */
+function addLabel(layer, pos, theText) {
+    try {
+        var theLabel = layer.textFrames.add();
+
+        theLabel.contents = theText;
+
+        var charAttributes = theLabel.textRange.characterAttributes;
+        var parAttributes = theLabel.paragraphs[0].paragraphAttributes;
+
+        charAttributes.size = 8;
+        parAttributes.justification = Justification.CENTER;
+
+        try {
+            theLabel.position = pos;
+        }
+        catch(e) { 
+            alert('labelPosition : ' + e)
+        }
+
+        return theLabel;
+    } 
+    catch (e) { 
+        alert('addLabel : ' + e)
+    }
+}
+
+/**
  * Main logic to create the contact sheet.
  * @return void
  */
@@ -525,6 +558,10 @@ function doCreateContactSheet() {
 
                                 try {
                                     svgFile.position = [ x1, y1 ];
+
+                                    if (CONFIG.ADD_LABELS) {
+                                        addLabel(theLayer, [ x1, y1 - (svgFile.height + 20) ], f.name)
+                                    }
 
                                     if (typeof(svgFile.resize) == "function") {
                                         svgFile.resize(

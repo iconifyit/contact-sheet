@@ -59,6 +59,12 @@
 var CONFIG = {
 
     /**
+     * Whether or not to add the file name under each icon in the contact sheet.
+    * @type {boolean}
+    */
+    ADD_LABELS: true,
+
+    /**
      * Number of rows
      */
 

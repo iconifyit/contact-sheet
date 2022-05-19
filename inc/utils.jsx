@@ -558,7 +558,7 @@ function showProgressBar(maxvalue) {
         top = Math.abs(Math.ceil((bounds.height/2) - (100/2)));
     }
 
-    var progress = new Window("palette", 'Progress', [left, top, left + 450, top + 100]);
+    var progress = new Window("dialog", 'Progress', [left, top, left + 450, top + 100]);
     progress.pnl = progress.add("panel", [10, 10, 440, 100], 'Progress');
     progress.pnl.progBar = progress.pnl.add("progressbar", [20, 35, 410, 60], 0, maxvalue);
     progress.pnl.progBarLabel = progress.pnl.add("statictext", [20, 20, 320, 35], "0 of " + maxvalue);
